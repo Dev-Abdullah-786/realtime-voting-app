@@ -5,6 +5,8 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const path = require("path");
 const connectDB = require("./db");
+const pollRoutes = require("./routes/polls");
+const Poll = require("./models/Poll");
 
 // Connect to MongoDB
 connectDB();
@@ -26,6 +28,9 @@ const io = new Server(httpServer, {
 app.use(cors({ origin: isProduction ? false : "http://localhost:3000" }));
 app.use(express.json());
 
+// REST Routes
+app.use("/api/polls", pollRoutes);
+
 // Serve React production build
 if (isProduction) {
   const buildPath = path.join(__dirname, "../client/build");
@@ -41,6 +46,40 @@ if (isProduction) {
     res.json({ status: "LivePoll server is running 🚀" });
   });
 }
+
+// Socket.io events
+io.on("connection", (socket) => {
+  console.log(`Client connected: ${socket.id}`);
+
+  // Join a poll room
+  socket.on("joinPoll", (pollId) => {
+    socket.join(pollId);
+    console.log(`Socket ${socket.id} joined room: ${pollId}`);
+  });
+
+  // Handle vote submission via socket
+  socket.on("submitVote", async ({ pollId, optionIndex }) => {
+    try {
+      const poll = await Poll.findById(pollId);
+      if (!poll) return;
+
+      if (optionIndex < 0 || optionIndex >= poll.options.length) return;
+
+      poll.options[optionIndex].votes += 1;
+      poll.totalVotes += 1;
+      await poll.save();
+
+      // Broadcast updated poll to all clients in the room
+      io.to(pollId).emit("pollUpdated", poll);
+    } catch (err) {
+      console.error("Vote error:", err.message);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Client disconnected: ${socket.id}`);
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
