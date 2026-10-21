@@ -5,7 +5,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const path = require("path");
 const connectDB = require("./db");
-const pollRoutes = require("./routes/polls");
+const pollRoutes = require("./routes/poll");
 const Poll = require("./models/Poll");
 
 // Connect to MongoDB
