@@ -1,3 +1,4 @@
+import "../styles/HomePage.css";
 import { useEffect, useState } from "react";
 import PollCard from "../components/PollCard";
 

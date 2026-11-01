@@ -1,3 +1,4 @@
+import "../styles/HomePage.css";
 import { useNavigate } from "react-router-dom";
 
 function PollCard({ poll }) {
