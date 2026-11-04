@@ -1,4 +1,5 @@
 import socket from "../socket";
+import "../styles/PollPage.css";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
