@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../styles/CreatePage.css";
 import { useNavigate } from "react-router-dom";
 
 function CreatePage() {
